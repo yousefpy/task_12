@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Restaurant, Item
 from .forms import RestaurantForm, ItemForm, SignupForm, SigninForm
 from django.contrib.auth import login, authenticate, logout
+from django.db.models import Q
 
 def no_access(request):
     return render(request, 'no_access.html')
@@ -49,7 +50,16 @@ def restaurant_list(request):
     restaurants = Restaurant.objects.all()
     query = request.GET.get('q')
     if query:
-        restaurants = restaurants.filter(name__icontains=query)
+        # Not Bonus. Querying through a single field.
+        # restaurants = restaurants.filter(name__icontains=query)
+        
+        # Bonus. Querying through multiple fields.
+        restaurants = restaurants.filter(
+            Q(name__icontains=query)|
+            Q(description__icontains=query)|
+            Q(owner__username__icontains=query)
+        ).distinct()
+        #############
     context = {
        "restaurants": restaurants
     }
